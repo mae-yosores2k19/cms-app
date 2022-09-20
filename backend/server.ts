@@ -3,6 +3,7 @@ import express, { Express, Request, Response } from "express";
 import userRoute from "./routes/contact-route";
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
+const cors = require("cors")
 const db = require("./database/init");
 dotenv.config();
 
@@ -11,6 +12,7 @@ const port = process.env.PORT || 4000;
 // test 2
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors())
 
 db.connect();
 
