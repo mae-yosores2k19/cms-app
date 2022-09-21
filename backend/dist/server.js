@@ -8,12 +8,15 @@ const express_1 = __importDefault(require("express"));
 const contact_route_1 = __importDefault(require("./routes/contact-route"));
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
+const cors = require("cors");
 const db = require("./database/init");
 dotenv.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 4000;
+// test 2
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors());
 db.connect();
 app.get("/", (req, res) => {
     res.send("Express + TypeScript Server");

@@ -54,11 +54,6 @@ exports.getContactById = async (req: Request, res: Response) => {
   try {
     const { id } = req.body;
     if (id) {
-      console.log(
-        "%c 🚘: exports.getContactById -> id ",
-        "font-size:16px;background-color:#dce6af;color:black;",
-        id
-      );
       const getById = await contactService.getContactById(id);
       return res.json({ data: getById, msg: "Retrieve Successfully" });
     } else {

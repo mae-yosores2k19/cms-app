@@ -8,5 +8,4 @@ router.post("/removeContactById", contactController.removeContactById);
 router.post("/getContactById",contactController.getContactById)
 router.put("/updateContact", contactController.updateContact);
 
-
 export default router;

@@ -42,7 +42,9 @@ exports.removeContactById = async (id: IUser) => {
 
 exports.updateContact = async (data: any) => {
   try {
-    let updateUser = await User.findByIdAndUpdate(data.id, data, { new: true });
+    let updateUser = await User.findByIdAndUpdate(data._id, data, {
+      new: true,
+    });
     if (updateUser === null) {
       return { msg: "Not found" };
     } else {
@@ -53,15 +55,15 @@ exports.updateContact = async (data: any) => {
   }
 };
 
-exports.getContactById = async (id:any) =>{
+exports.getContactById = async (id: any) => {
   try {
-    let getById = await User.findById(id)
-    if(getById === null){
-      return {msg:"Not found"}
-    }else{
-      return {msg:"Success", data:getById}
+    let getById = await User.findById(id);
+    if (getById === null) {
+      return { msg: "Not found" };
+    } else {
+      return { msg: "Success", data: getById };
     }
   } catch (error) {
-    return {msg:"Internal server error"}
+    return { msg: "Internal server error" };
   }
-}
+};

@@ -65,7 +65,6 @@ exports.getContactById = (req, res) => __awaiter(void 0, void 0, void 0, functio
     try {
         const { id } = req.body;
         if (id) {
-            console.log("%c 🚘: exports.getContactById -> id ", "font-size:16px;background-color:#dce6af;color:black;", id);
             const getById = yield contactService.getContactById(id);
             return res.json({ data: getById, msg: "Retrieve Successfully" });
         }

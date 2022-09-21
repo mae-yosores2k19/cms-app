@@ -55,7 +55,9 @@ exports.removeContactById = (id) => __awaiter(void 0, void 0, void 0, function* 
 });
 exports.updateContact = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let updateUser = yield contact_models_1.User.findByIdAndUpdate(data.id, data, { new: true });
+        let updateUser = yield contact_models_1.User.findByIdAndUpdate(data._id, data, {
+            new: true,
+        });
         if (updateUser === null) {
             return { msg: "Not found" };
         }

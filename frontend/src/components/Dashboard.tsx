@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./style.css";
 import {
   TableContainer,
@@ -20,6 +20,7 @@ import {
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import api from "../helper/api";
+import { IUser } from "./type";
 
 const style = {
   position: "absolute" as "absolute",
@@ -33,10 +34,6 @@ const style = {
   p: 4,
 };
 const Dashboard = () => {
-  const rows = [
-    { fname: "Jessa Mae", lname: "Yosores", address: "Dalaguete Cebu" },
-    { fname: "Redgie", lname: "Gravador", address: "Talamban Cebu" },
-  ];
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -55,26 +52,80 @@ const Dashboard = () => {
 
   const userContact = { firstname: "", lastname: "", address: "" };
   const [user, setUser] = useState(userContact);
+  const [listOfContact, setListOfContact] = useState([]);
+  const [btnAction, setBtnAction] = useState<boolean>(true);
 
   const handleUserInput = (e: any) => {
     const { value, name } = e.target;
     setUser({ ...user, [name]: value });
   };
 
+  const { firstname, lastname, address } = user ?? {};
   const handleAddContact = async () => {
-    const { firstname, lastname, address } = user ?? {};
-    console.log("%c ⏏️: handleAddContact -> user ", "font-size:16px;background-color:#1430e9;color:white;", user)
     try {
       if (firstname && lastname && address) {
         const res = await api.addContact(user);
-        console.log("%c 🥑: handleAddContact -> res ", "font-size:16px;background-color:#629d9d;color:white;", res)
-        setUser(user)
-        handleClose()
-    }
+        if (res?.response.msg !== "success") {
+          alert("Something went wrong");
+        } else {
+          handleClose();
+          setUser(user);
+        }
+      } else {
+        alert("all fields are required!");
+      }
     } catch (error) {
-
+      alert("Internal server error");
     }
   };
+  const handleGetListOfContact = async () => {
+    const result = await api.getAllContact();
+    setListOfContact(result.data.data);
+  };
+
+  const handleDeleteContact = async (id: IUser) => {
+    try {
+      const res = await api.deleteContact(id);
+      const contactList = listOfContact.filter((contact: any) => {
+        return contact._id !== id;
+      });
+      setListOfContact(contactList);
+      return res;
+    } catch (error) {
+      alert("Internal server error");
+    }
+  };
+  const handleOpenToUpdate = async (id: IUser) => {
+    console.log(
+      "%c 🚽: handleOpenToUpdate -> id ",
+      "font-size:16px;background-color:#05f9f0;color:black;",
+      id
+    );
+    try {
+      if (id) {
+        const res = await api.updateContact(id);
+        console.log(
+          "%c 🏚️: handleOpenToUpdate -> res ",
+          "font-size:16px;background-color:#7b6f32;color:white;",
+          res
+        );
+        const { data } = res;
+        setBtnAction(false);
+        setUser({ ...data[0] });
+        handleOpen();
+      }
+    } catch (error) {
+      alert("Internal sserver error");
+    }
+  };
+  const handleUpdateContact = async (id: IUser) => {
+    try {
+    } catch (error) {}
+  };
+
+  useEffect(() => {
+    handleGetListOfContact();
+  }, []);
 
   return (
     <div>
@@ -109,29 +160,32 @@ const Dashboard = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows
+              {listOfContact
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row) => {
+                .map((contact) => {
+                  const { firstname, lastname, address, _id } = contact;
                   return (
                     <TableRow hover role="checkbox">
                       <TableCell align="center" colSpan={3}>
-                        {row.fname}
+                        {firstname}
                       </TableCell>
                       <TableCell align="center" colSpan={3}>
-                        {row.lname}
+                        {lastname}
                       </TableCell>
                       <TableCell align="center" colSpan={3}>
-                        {row.address}
+                        {address}
                       </TableCell>
                       <TableCell align="center" colSpan={3}>
                         <span>
                           <EditOutlinedIcon
                             style={{ color: "green" }}
+                            onClick={() => handleOpenToUpdate(_id)}
                           ></EditOutlinedIcon>
                         </span>
                         <span>
                           <DeleteOutlineOutlinedIcon
                             style={{ color: "red" }}
+                            onClick={() => handleDeleteContact(_id)}
                           ></DeleteOutlineOutlinedIcon>
                         </span>
                       </TableCell>
@@ -144,7 +198,7 @@ const Dashboard = () => {
         <TablePagination
           rowsPerPageOptions={[10, 25, 100]}
           component="div"
-          count={rows.length}
+          count={listOfContact.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
@@ -174,6 +228,7 @@ const Dashboard = () => {
                 id="standard-basic"
                 label="First Name"
                 name="firstname"
+                value={firstname ?? ""}
                 variant="standard"
                 onChange={(e) => handleUserInput(e)}
               />
@@ -184,6 +239,7 @@ const Dashboard = () => {
                 label="Last Name"
                 sx={{ width: 250 }}
                 name="lastname"
+                value={lastname ?? ""}
                 variant="standard"
                 onChange={(e) => handleUserInput(e)}
               />
@@ -194,13 +250,28 @@ const Dashboard = () => {
                 sx={{ width: 250 }}
                 label="Address"
                 name="address"
+                value={address ?? ""}
                 variant="standard"
                 onChange={(e) => handleUserInput(e)}
               />
             </Typography>
-            <Button variant="contained" sx={{ top: 10 }} onClick={handleAddContact}>
-              Add Contact
-            </Button>
+            {btnAction ? (
+              <Button
+                variant="contained"
+                sx={{ top: 10 }}
+                onClick={handleAddContact}
+              >
+                Add Contact
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                sx={{ top: 10 }}
+                // onClick={handleAddContact}
+              >
+                Update Contact
+              </Button>
+            )}
           </Box>
         </Fade>
       </Modal>
