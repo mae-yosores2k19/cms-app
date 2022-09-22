@@ -3,6 +3,7 @@ import { IUser } from "../components/type";
 const base =
   process.env.REACT_APP_API_URL ||
   "https://contact-management-api.herokuapp.com/api/user";
+  // "http://localhost:4000/api/user/";
 
 const addContact = async (body: IUser) => {
   try {
@@ -21,19 +22,27 @@ const getAllContact = async () => {
     console.log(error, "Internal server error");
   }
 };
-
-const deleteContact = async (id: IUser) => {
+const getContactById = async (id: string) => {
   try {
-    const { data } = await axios.post(`${base}/removeContactById`, id);
+    let { data } = await axios.post(`${base}/getContactById`, { id });
     return data;
   } catch (error) {
     console.log(error, "Internal server error");
   }
 };
 
-const updateContact = async (id: IUser) => {
+const deleteContact = async (id: string) => {
   try {
-    const { data } = await axios.put(`${base}/updateContact`, id);
+    const { data } = await axios.post(`${base}/removeContactById`, { id });
+    return data;
+  } catch (error) {
+    console.log(error, "Internal server error");
+  }
+};
+
+const updateContact = async (body: IUser) => {
+  try {
+    const { data } = await axios.put(`${base}/updateContact/`, body);
     return data;
   } catch (error) {
     console.log(error, "Internal server error");
@@ -43,6 +52,7 @@ const updateContact = async (id: IUser) => {
 export default {
   addContact,
   getAllContact,
+  getContactById,
   deleteContact,
   updateContact,
 };

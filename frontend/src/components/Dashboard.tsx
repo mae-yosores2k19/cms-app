@@ -20,7 +20,6 @@ import {
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import api from "../helper/api";
-import { IUser } from "./type";
 
 const style = {
   position: "absolute" as "absolute",
@@ -61,15 +60,22 @@ const Dashboard = () => {
   };
 
   const { firstname, lastname, address } = user ?? {};
+
+  const handleGetListOfContact = async () => {
+    const result = await api.getAllContact();
+    setListOfContact(result.data.data);
+  };
+
   const handleAddContact = async () => {
     try {
       if (firstname && lastname && address) {
         const res = await api.addContact(user);
-        if (res?.response.msg !== "success") {
+        if (res?.data?.msg !== "Created Successfully") {
           alert("Something went wrong");
         } else {
           handleClose();
-          setUser(user);
+          setUser({ firstname: "", lastname: "", address: "" });
+          handleGetListOfContact();
         }
       } else {
         alert("all fields are required!");
@@ -78,12 +84,8 @@ const Dashboard = () => {
       alert("Internal server error");
     }
   };
-  const handleGetListOfContact = async () => {
-    const result = await api.getAllContact();
-    setListOfContact(result.data.data);
-  };
 
-  const handleDeleteContact = async (id: IUser) => {
+  const handleDeleteContact = async (id: string) => {
     try {
       const res = await api.deleteContact(id);
       const contactList = listOfContact.filter((contact: any) => {
@@ -95,31 +97,38 @@ const Dashboard = () => {
       alert("Internal server error");
     }
   };
-  const handleOpenToUpdate = async (id: IUser) => {
-    console.log(
-      "%c 🚽: handleOpenToUpdate -> id ",
-      "font-size:16px;background-color:#05f9f0;color:black;",
-      id
-    );
+
+  const openCreate = () => {
+    setBtnAction(true);
+    handleOpen();
+  };
+  const handleOpenToUpdate = async (id: string) => {
     try {
       if (id) {
-        const res = await api.updateContact(id);
-        console.log(
-          "%c 🏚️: handleOpenToUpdate -> res ",
-          "font-size:16px;background-color:#7b6f32;color:white;",
-          res
-        );
-        const { data } = res;
+        const res = await api.getContactById(id);
+        const { data } = res.data;
         setBtnAction(false);
-        setUser({ ...data[0] });
+        setUser({ ...data });
         handleOpen();
       }
     } catch (error) {
       alert("Internal sserver error");
     }
   };
-  const handleUpdateContact = async (id: IUser) => {
+  const handleUpdateContact = async () => {
     try {
+      if (firstname && lastname && address) {
+        const res = await api.updateContact(user);
+        if (res?.data.msg !== "Success") {
+          alert("Something went wrong");
+        } else {
+          handleGetListOfContact();
+          setUser({ firstname: "", lastname: "", address: "" });
+          handleClose();
+        }
+      } else {
+        alert("All fields are required!");
+      }
     } catch (error) {}
   };
 
@@ -131,7 +140,7 @@ const Dashboard = () => {
     <div>
       {" "}
       <div className="buttonCreate">
-        <Button variant="contained" onClick={handleOpen}>
+        <Button variant="contained" onClick={openCreate}>
           Create
         </Button>
       </div>
@@ -162,10 +171,10 @@ const Dashboard = () => {
             <TableBody>
               {listOfContact
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((contact) => {
+                .map((contact, i) => {
                   const { firstname, lastname, address, _id } = contact;
                   return (
-                    <TableRow hover role="checkbox">
+                    <TableRow hover role="checkbox" key={i}>
                       <TableCell align="center" colSpan={3}>
                         {firstname}
                       </TableCell>
@@ -267,7 +276,7 @@ const Dashboard = () => {
               <Button
                 variant="contained"
                 sx={{ top: 10 }}
-                // onClick={handleAddContact}
+                onClick={() => handleUpdateContact()}
               >
                 Update Contact
               </Button>
