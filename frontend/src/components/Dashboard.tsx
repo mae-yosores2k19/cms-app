@@ -228,10 +228,15 @@ const Dashboard = () => {
       >
         <Fade in={open}>
           <Box sx={{ ...style, textAlign: "center" }}>
-            <Typography style={{ textAlign: "center" }}>
-              Create User Contact
+            <Typography style={{ textAlign: "center" }} component={"div"}>
+              {btnAction ? "Create User Contact" : "Update User Contact"}
             </Typography>
-            <Typography id="transition-modal-title" variant="h6" component="h2">
+            <Typography
+              id="transition-modal-title"
+              sx={{ mt: 2 }}
+              variant="h6"
+              component={"div"}
+            >
               <TextField
                 sx={{ width: 250 }}
                 id="standard-basic"
@@ -242,7 +247,11 @@ const Dashboard = () => {
                 onChange={(e) => handleUserInput(e)}
               />
             </Typography>
-            <Typography id="transition-modal-description" sx={{ mt: 4 }}>
+            <Typography
+              id="transition-modal-description"
+              sx={{ mt: 2 }}
+              component={"div"}
+            >
               <TextField
                 id="standard-basic"
                 label="Last Name"
@@ -253,7 +262,11 @@ const Dashboard = () => {
                 onChange={(e) => handleUserInput(e)}
               />
             </Typography>
-            <Typography id="transition-modal-description" sx={{ mt: 2 }}>
+            <Typography
+              id="transition-modal-description"
+              sx={{ mt: 2 }}
+              component={"div"}
+            >
               <TextField
                 id="standard-basic"
                 sx={{ width: 250 }}
