@@ -2,8 +2,8 @@ import axios from "axios";
 import { IUser } from "../components/type";
 const base =
   process.env.REACT_APP_API_URL ||
-  "https://contact-management-api.herokuapp.com/api/user";
-  // "http://localhost:4000/api/user/";
+  // "https://contact-management-api.herokuapp.com/api/user";
+  "http://localhost:4000/api/user/";
 
 const addContact = async (body: IUser) => {
   try {
