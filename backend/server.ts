@@ -16,7 +16,7 @@ app.use(cors())
 
 db.connect();
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/*", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
 });
 app.use("/api/user", userRoute);
