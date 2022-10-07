@@ -2,12 +2,13 @@ import axios from "axios";
 import { IUser } from "../components/type";
 const base =
   process.env.REACT_APP_API_URL ||
-  "https://contact-management-api.herokuapp.com/api/user";
-  // "http://localhost:4000/api/user/";
+  // "https://contact-management-api.herokuapp.com/api/user";//for not containerize api
+  // "https://dockerize-cms-api.herokuapp.com/api/user" //for containerize api
+  "http://localhost:4000/api/user/"; //local api
 
 const addContact = async (body: IUser) => {
   try {
-    let { data } = await axios.post(`${base}/addContact`, body);
+    let { data } = await axios.post(`${base}/addContact`, body);  
     return data;
   } catch (error) {
     console.log(error, "Internal server error");

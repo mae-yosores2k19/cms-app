@@ -14,10 +14,11 @@ const mongoose_1 = require("mongoose");
 const userSchema = new mongoose_1.Schema({
     firstname: { type: String, required: true },
     lastname: { type: String, required: true },
-    address: { type: String, required: true },
+    billingaddress: { type: String, required: true },
+    physicaladdress: { type: String, required: true },
 });
 exports.User = (0, mongoose_1.model)("User", userSchema);
 const isUser = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    return ['firstname', 'lastname', 'address'].every((key) => user.hasOwnProperty(key));
+    return ['firstname', 'lastname', 'billingaddress', 'physicaladdress'].every((key) => user.hasOwnProperty(key));
 });
 exports.isUser = isUser;

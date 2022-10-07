@@ -4,8 +4,10 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-COPY ["package.json", "package-lock.json*", "./"]
+COPY ["package.json", "package-lock.json*","tsconfig.json", "./"]
 RUN npm install --production
 
+EXPOSE 4000
+
 COPY . .
-CMD ["node","server.ts"]
+CMD ["node","dist/server.js"]

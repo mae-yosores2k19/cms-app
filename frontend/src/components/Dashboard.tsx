@@ -8,30 +8,15 @@ import {
   TableCell,
   TableBody,
   Paper,
-  TextField,
   Button,
   TablePagination,
-  Modal,
-  Fade,
-  Box,
-  Typography,
-  Backdrop,
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import api from "../helper/api";
-
-const style = {
-  position: "absolute" as "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};
+import ModalView from "./ModalView";
+import Swal from "sweetalert2";
+import { UserState } from "./type";
 const Dashboard = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -49,39 +34,80 @@ const Dashboard = () => {
     setPage(0);
   };
 
-  const userContact = { firstname: "", lastname: "", address: "" };
-  const [user, setUser] = useState(userContact);
+  const initial = {
+    userContact: {
+      firstname: "",
+      lastname: "",
+      billingaddress: "",
+      physicaladdress: "",
+    },
+    error: [],
+    msg: "",
+  };
+  const [user, setUser] = useState<UserState>(initial);
   const [listOfContact, setListOfContact] = useState([]);
   const [btnAction, setBtnAction] = useState<boolean>(true);
 
   const handleUserInput = (e: any) => {
     const { value, name } = e.target;
-    setUser({ ...user, [name]: value });
+    setUser({
+      ...user,
+      userContact: { ...user.userContact, [name]: value },
+      error: [],
+    });
   };
-
-  const { firstname, lastname, address } = user ?? {};
 
   const handleGetListOfContact = async () => {
     const result = await api.getAllContact();
-    setListOfContact(result.data.data);
+    if (result.data.msg === "No data Available") {
+      setListOfContact([]);
+    } else {
+      setListOfContact(result.data.data ?? []);
+    }
+  };
+  // For validation (all fields are required)
+  const handleValidation = () => {
+    let items: string[] = [];
+    Object.entries(user.userContact).map(
+      ([key, val]) => !val && items.push(key)
+    );
+    setUser({ ...user, error: items, msg: "❌All Fields Required" });
+    return items;
   };
 
   const handleAddContact = async () => {
+    const { firstname, lastname, billingaddress, physicaladdress } =
+      user.userContact ?? {};
+    let error: string[] = [];
     try {
-      if (firstname && lastname && address) {
-        const res = await api.addContact(user);
+      !firstname && error.push("firstname");
+      !lastname && error.push("lastname");
+      !physicaladdress && error.push("physicaladdress");
+      !billingaddress && error.push("billingaddress");
+      if (!error.length) {
+        const res = await api.addContact(user.userContact);
         if (res?.data?.msg !== "Created Successfully") {
-          alert("Something went wrong");
+          Swal.fire("Warning", "Something went wrong!", "warning");
         } else {
           handleClose();
-          setUser({ firstname: "", lastname: "", address: "" });
+          setUser({
+            ...user,
+            userContact: {
+              firstname: "",
+              lastname: "",
+              physicaladdress: "",
+              billingaddress: "",
+            },
+            error: [],
+            msg: "",
+          });
           handleGetListOfContact();
         }
       } else {
-        alert("all fields are required!");
+        handleValidation();
       }
     } catch (error) {
-      alert("Internal server error");
+      Swal.fire("Warning", "Server error!", "warning");
     }
   };
 
@@ -94,8 +120,24 @@ const Dashboard = () => {
       setListOfContact(contactList);
       return res;
     } catch (error) {
-      alert("Internal server error");
+      Swal.fire("Warning", "Server Error", "warning");
     }
+  };
+  const handleClickedDeleteIcon = (id: string) => {
+    Swal.fire({
+      allowOutsideClick: false,
+      title: "Are you sure?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire("Deleted!", "One contact has been deleted.", "success");
+        handleDeleteContact(id);
+      }
+    });
   };
 
   const openCreate = () => {
@@ -108,26 +150,34 @@ const Dashboard = () => {
         const res = await api.getContactById(id);
         const { data } = res.data;
         setBtnAction(false);
-        setUser({ ...data });
+        setUser({ msg: "", error: [], userContact: { ...data} });
         handleOpen();
       }
     } catch (error) {
-      alert("Internal sserver error");
+      Swal.fire("Warning", "Server error!", "warning");
     }
   };
   const handleUpdateContact = async () => {
+    const { firstname, lastname, billingaddress, physicaladdress } =
+      user.userContact ?? {};
+    let error: string[] = [];
     try {
-      if (firstname && lastname && address) {
-        const res = await api.updateContact(user);
+      !firstname && error.push("firstname");
+      !lastname && error.push("lastname");
+      !physicaladdress && error.push("physicaladdress");
+      !billingaddress && error.push("billingaddress");
+      if (!error.length) {
+        const res = await api.updateContact(user.userContact);
         if (res?.data.msg !== "Success") {
-          alert("Something went wrong");
+          Swal.fire("Warning", "Something went wrong1", "warning");
         } else {
+          // Swal.fire("Updated", "Update Successfully!!!", "success");
           handleGetListOfContact();
-          setUser({ firstname: "", lastname: "", address: "" });
+          // setUser({ firstname: "", lastname: "", address: "" });
           handleClose();
         }
       } else {
-        alert("All fields are required!");
+        handleValidation();
       }
     } catch (error) {}
   };
@@ -154,53 +204,74 @@ const Dashboard = () => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell align="center" colSpan={3}>
+                <TableCell align="center" colSpan={2}>
                   First Name
                 </TableCell>
-                <TableCell align="center" colSpan={3}>
+                <TableCell align="center" colSpan={2}>
                   Last Name
                 </TableCell>
                 <TableCell align="center" colSpan={3}>
-                  Address
+                  Physical Address
                 </TableCell>
                 <TableCell align="center" colSpan={3}>
+                  Billing Address
+                </TableCell>
+                <TableCell align="center" colSpan={2}>
                   Action
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {listOfContact
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((contact, i) => {
-                  const { firstname, lastname, address, _id } = contact;
-                  return (
-                    <TableRow hover role="checkbox" key={i}>
-                      <TableCell align="center" colSpan={3}>
-                        {firstname}
-                      </TableCell>
-                      <TableCell align="center" colSpan={3}>
-                        {lastname}
-                      </TableCell>
-                      <TableCell align="center" colSpan={3}>
-                        {address}
-                      </TableCell>
-                      <TableCell align="center" colSpan={3}>
-                        <span>
-                          <EditOutlinedIcon
-                            style={{ color: "green" }}
-                            onClick={() => handleOpenToUpdate(_id)}
-                          ></EditOutlinedIcon>
-                        </span>
-                        <span>
-                          <DeleteOutlineOutlinedIcon
-                            style={{ color: "red" }}
-                            onClick={() => handleDeleteContact(_id)}
-                          ></DeleteOutlineOutlinedIcon>
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+              {listOfContact.length ? (
+                listOfContact
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((contact, i) => {
+                    const {
+                      firstname,
+                      lastname,
+                      physicaladdress,
+                      billingaddress,
+                      _id,
+                    } = contact;
+                    return (
+                      <TableRow hover role="checkbox" key={i}>
+                        <TableCell align="center" colSpan={2}>
+                          {firstname}
+                        </TableCell>
+                        <TableCell align="center" colSpan={2}>
+                          {lastname}
+                        </TableCell>
+                        <TableCell align="center" colSpan={3}>
+                          {physicaladdress}
+                        </TableCell>
+                        <TableCell align="center" colSpan={3}>
+                          {billingaddress}
+                        </TableCell>
+                        <TableCell align="center" colSpan={2}>
+                          <span>
+                            <EditOutlinedIcon
+                              style={{ color: "green" }}
+                              onClick={() => handleOpenToUpdate(_id)}
+                            ></EditOutlinedIcon>
+                          </span>
+                          <span>
+                            <DeleteOutlineOutlinedIcon
+                              style={{ color: "red" }}
+                              onClick={() => handleClickedDeleteIcon(_id)}
+                            ></DeleteOutlineOutlinedIcon>
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+              ) : (
+                // <div>a;lsdk</div>
+                <TableRow>
+                  <TableCell align="center" colSpan={12}>
+                    No Data Available
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -215,88 +286,15 @@ const Dashboard = () => {
         />
       </Paper>
       {/* Modal */}
-      <Modal
-        aria-labelledby="transition-modal-title"
-        aria-describedby="transition-modal-description"
+      <ModalView
+        handleClose={handleClose}
         open={open}
-        onClose={handleClose}
-        closeAfterTransition
-        BackdropComponent={Backdrop}
-        BackdropProps={{
-          timeout: 500,
-        }}
-      >
-        <Fade in={open}>
-          <Box sx={{ ...style, textAlign: "center" }}>
-            <Typography style={{ textAlign: "center" }} component={"div"}>
-              {btnAction ? "Create User Contact" : "Update User Contact"}
-            </Typography>
-            <Typography
-              id="transition-modal-title"
-              sx={{ mt: 2 }}
-              variant="h6"
-              component={"div"}
-            >
-              <TextField
-                sx={{ width: 250 }}
-                id="standard-basic"
-                label="First Name"
-                name="firstname"
-                value={firstname ?? ""}
-                variant="standard"
-                onChange={(e) => handleUserInput(e)}
-              />
-            </Typography>
-            <Typography
-              id="transition-modal-description"
-              sx={{ mt: 2 }}
-              component={"div"}
-            >
-              <TextField
-                id="standard-basic"
-                label="Last Name"
-                sx={{ width: 250 }}
-                name="lastname"
-                value={lastname ?? ""}
-                variant="standard"
-                onChange={(e) => handleUserInput(e)}
-              />
-            </Typography>
-            <Typography
-              id="transition-modal-description"
-              sx={{ mt: 2 }}
-              component={"div"}
-            >
-              <TextField
-                id="standard-basic"
-                sx={{ width: 250 }}
-                label="Address"
-                name="address"
-                value={address ?? ""}
-                variant="standard"
-                onChange={(e) => handleUserInput(e)}
-              />
-            </Typography>
-            {btnAction ? (
-              <Button
-                variant="contained"
-                sx={{ top: 10 }}
-                onClick={handleAddContact}
-              >
-                Add Contact
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                sx={{ top: 10 }}
-                onClick={() => handleUpdateContact()}
-              >
-                Update Contact
-              </Button>
-            )}
-          </Box>
-        </Fade>
-      </Modal>
+        btnAction={btnAction}
+        handleUserInput={handleUserInput}
+        handleAddContact={handleAddContact}
+        handleUpdateContact={handleUpdateContact}
+        user={user}
+      />
     </div>
   );
 };
