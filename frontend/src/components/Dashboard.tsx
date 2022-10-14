@@ -10,6 +10,7 @@ import {
   Paper,
   Button,
   TablePagination,
+  TextField,
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
@@ -46,7 +47,9 @@ const Dashboard = () => {
   };
   const [user, setUser] = useState<UserState>(initial);
   const [listOfContact, setListOfContact] = useState([]);
+  const [defaultList, setDefaultList] = useState([]);
   const [btnAction, setBtnAction] = useState<boolean>(true);
+  const [search, setSearch] = useState<string>("");
 
   const handleUserInput = (e: any) => {
     const { value, name } = e.target;
@@ -63,6 +66,7 @@ const Dashboard = () => {
       setListOfContact([]);
     } else {
       setListOfContact(result.data.data ?? []);
+      setDefaultList(result.data.data ?? []);
     }
   };
   // For validation (all fields are required)
@@ -150,7 +154,7 @@ const Dashboard = () => {
         const res = await api.getContactById(id);
         const { data } = res.data;
         setBtnAction(false);
-        setUser({ msg: "", error: [], userContact: { ...data} });
+        setUser({ msg: "", error: [], userContact: { ...data } });
         handleOpen();
       }
     } catch (error) {
@@ -182,6 +186,19 @@ const Dashboard = () => {
     } catch (error) {}
   };
 
+  const handleSearch = (e: any) => {
+    const searchVal = e.target.value;
+    const filterRow = listOfContact.filter((row: any) => {
+      const str = row.firstname + row.lastname;
+      return str.toLowerCase().includes(searchVal.toLowerCase());
+    });
+    setListOfContact(filterRow);
+    if (searchVal == "") {
+      setListOfContact(defaultList);
+    }
+    setSearch(searchVal);
+  };
+
   useEffect(() => {
     handleGetListOfContact();
   }, []);
@@ -189,6 +206,7 @@ const Dashboard = () => {
   return (
     <div>
       {" "}
+      <div className="title">Contact Management System</div>
       <div className="buttonCreate">
         <Button variant="contained" onClick={openCreate}>
           Create
@@ -198,9 +216,26 @@ const Dashboard = () => {
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
-              <TableRow style={{ backgroundColor: "yellow" }}>
+              {/* <TableRow style={{ backgroundColor: "yellow" }}>
                 <TableCell align="center" colSpan={12}>
                   User Contact Management System
+                </TableCell>
+              </TableRow> */}
+              <TableRow>
+                <TableCell align="right" colSpan={12}>
+                  <TextField
+                    fullWidth
+                    // className="textField"
+                    sx={{ paddingTop: -3, paddingBottom: -3 }}
+                    size="small"
+                    // variant="Outlined secondary"
+                    placeholder="Search…"
+                    type="text"
+                    name="search"
+                    // value={search}
+                    onChange={(e) => handleSearch(e)}
+                  />
+                  {/* </Search> */}
                 </TableCell>
               </TableRow>
               <TableRow>

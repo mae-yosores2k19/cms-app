@@ -3,8 +3,8 @@ import { IUser } from "../components/type";
 const base =
   process.env.REACT_APP_API_URL ||
   // "https://contact-management-api.herokuapp.com/api/user";//for not containerize api
-  // "https://dockerize-cms-api.herokuapp.com/api/user" //for containerize api
-  "http://localhost:4000/api/user/"; //local api
+  "https://dockerize-cms-api.herokuapp.com/api/user" //for containerize api
+  // "http://localhost:4000/api/user/"; //local api
 
 const addContact = async (body: IUser) => {
   try {

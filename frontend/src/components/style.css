@@ -2,7 +2,8 @@
     text-align: right;
     margin-top: 30px;
     margin-bottom: 30px;
-    margin-right: 210px
+    margin-right: 180px;
+    /* display:inline-table */
 }
 
 .tableCell {
@@ -20,6 +21,17 @@
     box-Shadow: 24;
     /* p: 4, */
 }
-.textfield{
-    width:300
+
+.textfield {
+    width: 300;
+    background-color: red
+}
+
+.title {
+    margin: "auto";
+    padding: 26px 0px 0px 0px;
+    font-size: 30px;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace, Bold;
+    font-weight: 700;
 }
