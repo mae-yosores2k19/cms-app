@@ -8,8 +8,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\"",
-    "build": "ng build --prod"
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/server.js\""
+    
   },
   "author": "",
   "license": "ISC",
