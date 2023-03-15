@@ -18,35 +18,25 @@ import api from "../helper/api";
 import ModalView from "./ModalView";
 import Swal from "sweetalert2";
 import { UserState } from "./type";
-import { useDispatch, useSelector } from "react-redux";
-import { State, actionCreators } from "../state/index";
-import { bindActionCreators } from "redux";
 const Dashboard = () => {
-  const dispatch = useDispatch();
-  const {
-    addContact,
-    updateContact,
-    getContact,
-    removeContact,
-    searchContact,
-  } = bindActionCreators(actionCreators, dispatch);
   
-  const contactState = useSelector((state: State) => state.contact);
-  // const initial = {
-  //   userContact: {
-  //     firstname: "",
-  //     lastname: "",
-  //     billingaddress: "",
-  //     physicaladdress: "",
-  //   },
-  //   error: [],
-  //   msg: "",
-  // };
-  const [user, setUser] = useState<UserState>(contactState);
+  
+  const initial = {
+    userContact: {
+      firstname: "",
+      lastname: "",
+      billingaddress: "",
+      physicaladdress: "",
+    },
+    error: [],
+    msg: "",
+  };
+  const [user, setUser] = useState<UserState>(initial);
   const [listOfContact, setListOfContact] = useState([]);
   const [defaultList, setDefaultList] = useState([]);
   const [btnAction, setBtnAction] = useState<boolean>(true);
   const [search, setSearch] = useState<string>("");
+  
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -79,7 +69,6 @@ const Dashboard = () => {
     if (result.data.msg === "No data Available") {
       setListOfContact([]);
     } else {
-      getContact(result.data.data)//storing data to reducers
       setListOfContact(result.data.data ?? []);
       setDefaultList(result.data.data ?? []);
     }
@@ -108,7 +97,6 @@ const Dashboard = () => {
         if (res?.data?.msg !== "Created Successfully") {
           Swal.fire("Warning", "Something went wrong!", "warning");
         } else {
-          addContact(user); //dispatch contact
           handleClose();
           setUser({
             ...user,
@@ -138,7 +126,6 @@ const Dashboard = () => {
         return contact._id !== id;
       });
       setListOfContact(contactList);
-      removeContact(id);//removing data with redux
       return res;
     } catch (error) {
       Swal.fire("Warning", "Server Error", "warning");
@@ -192,9 +179,7 @@ const Dashboard = () => {
         if (res?.data.msg !== "Success") {
           Swal.fire("Warning", "Something went wrong1", "warning");
         } else {
-          updateContact(user); //dispatch update
           handleGetListOfContact();
-          // setUser({ firstname: "", lastname: "", address: "" });
           handleClose();
         }
       } else {
@@ -210,8 +195,7 @@ const Dashboard = () => {
       return str.toLowerCase().includes(searchVal.toLowerCase());
     });
     setListOfContact(filterRow);
-    searchContact(filterRow)//search in reducer
-    if (searchVal == "") {
+    if (searchVal === "") {
       setListOfContact(defaultList);
     }
     setSearch(searchVal);
@@ -243,7 +227,7 @@ const Dashboard = () => {
                     placeholder="Search…"
                     type="text"
                     name="search"
-                    onChange={(e:React.ChangeEvent<HTMLInputElement>) => handleSearch(e)}
+                    onChange={(search:React.ChangeEvent<HTMLInputElement>) => handleSearch(search)}
                   />
                   {/* </Search> */}
                 </TableCell>
@@ -310,7 +294,7 @@ const Dashboard = () => {
                     );
                   })
               ) : (
-                // <div>a;lsdk</div>
+              
                 <TableRow>
                   <TableCell align="center" colSpan={12}>
                     No Data Available
@@ -318,64 +302,6 @@ const Dashboard = () => {
                 </TableRow>
               )}
             </TableBody>
-            {/* state from reducers store */}
-            {/* <TableBody>
-              {Object.entries(userContact).length ? (
-                Object.entries(userContact)
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((contact, i) => {
-                    console.log(
-                      "%c 🏄‍♀️: Dashboard -> contact ",
-                      "font-size:16px;background-color:#24af98;color:white;",
-                      contact[1]
-                    );
-                    const {
-                      firstname,
-                      lastname,
-                      physicaladdress,
-                      billingaddress,
-                      _id,
-                    } = contact;
-                    return (
-                      <TableRow hover role="checkbox" key={i}>
-                        <TableCell align="center" colSpan={2}>
-                          {firstname}
-                        </TableCell>
-                        <TableCell align="center" colSpan={2}>
-                          {lastname}
-                        </TableCell>
-                        <TableCell align="center" colSpan={3}>
-                          {physicaladdress}
-                        </TableCell>
-                        <TableCell align="center" colSpan={3}>
-                          {billingaddress}
-                        </TableCell>
-                        <TableCell align="center" colSpan={2}>
-                          <span>
-                            <EditOutlinedIcon
-                              style={{ color: "green" }}
-                              onClick={() => handleOpenToUpdate(_id)}
-                            ></EditOutlinedIcon>
-                          </span>
-                          <span>
-                            <DeleteOutlineOutlinedIcon
-                              style={{ color: "red" }}
-                              onClick={() => handleClickedDeleteIcon(_id)}
-                            ></DeleteOutlineOutlinedIcon>
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-              ) : (
-                // <div>a;lsdk</div>
-                <TableRow>
-                  <TableCell align="center" colSpan={12}>
-                    No Data Available
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody> */}
           </Table>
         </TableContainer>
         <TablePagination
